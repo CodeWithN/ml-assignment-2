@@ -1,0 +1,24 @@
+our remaining workflow
+
+1. VS Code — Code and models
+Training completed; five models and test data generated. Confirm the app runs and the requirements file includes every dependency.
+
+
+
+2. GitHub — Upload the project
+Create or use your repository and upload the Python files, requirements.txt, README.md, test_data.csv, and required saved models and metrics.
+
+
+
+3. Streamlit Community Cloud — Deploy
+Deploy the app from GitHub, then verify model selection, CSV upload, metrics, confusion matrix, classification report, and comparison chart.
+
+
+
+4. BITS Pilani Virtual Lab
+Run the project as required by your assignment, capture the required screenshot, and verify the submission instructions.
+
+
+
+5. Final PDF submission
+Arrange the GitHub link, Streamlit app link, BITS Virtual Lab screenshot, and complete README in the required order.
