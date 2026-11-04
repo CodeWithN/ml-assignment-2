@@ -294,6 +294,18 @@ except ValueError as error:
     st.error(str(error))
     st.stop()
 
+BEST_PARAMS_FILE = MODEL_DIR / "best_params.csv"
+
+if BEST_PARAMS_FILE.is_file():
+    best_params = pd.read_csv(BEST_PARAMS_FILE).set_index("ML Model Name")
+
+    if model_name in best_params.index:
+        st.caption(
+            "Tuned with 5-fold GridSearchCV on the training split: "
+            f"`{best_params.loc[model_name, 'Best Parameters']}` "
+            f"(CV macro F1 = {best_params.loc[model_name, 'CV F1 (macro)']:.4f})"
+        )
+
 metric_columns = st.columns(6)
 
 for column, (metric_name, value) in zip(
