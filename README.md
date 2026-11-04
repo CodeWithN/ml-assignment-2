@@ -70,11 +70,11 @@ Each model's hyperparameters were tuned with `GridSearchCV` using 5-fold stratif
 
 | Model | Preprocessing | Grid searched | Selected | CV F1 (macro) |
 |---|---|---|---|---:|
-| Logistic Regression | StandardScaler (newton-cg solver, tol=1e-8) | C in {0.01, 0.1, 1, 10, 100} | C=100 | 0.9370 |
-| Decision Tree | none | criterion in {gini, entropy}, max_depth in {6, 8, 10, 12, None}, min_samples_leaf in {1, 5, 10, 20} | gini, max_depth=10, min_samples_leaf=10 | 0.9207 |
-| KNN | StandardScaler | n_neighbors in {3, 5, 7, 9, 11, 15, 21}, weights in {uniform, distance}, p in {1, 2} | n_neighbors=7, weights=distance, p=2 | 0.9362 |
-| Naive Bayes (Gaussian) | none or PowerTransformer (searched) | transform, var_smoothing in {1e-9, 1e-7, 1e-5} | PowerTransformer, var_smoothing=1e-9 | 0.9021 |
-| SVM (RBF kernel) | StandardScaler | C in {1, 10, 100}, gamma in {scale, 0.01, 0.1} | C=10, gamma=scale | 0.9427 |
+| Logistic Regression | StandardScaler (newton-cg solver, tol=1e-8) | C in {0.01, 0.1, 1, 10, 100} | C=100 | 0.937 |
+| Decision Tree | none | criterion in {gini, entropy}, max_depth in {6, 8, 10, 12, None}, min_samples_leaf in {1, 5, 10, 20} | gini, max_depth=10, min_samples_leaf=10 | 0.921 |
+| KNN | StandardScaler | n_neighbors in {3, 5, 7, 9, 11, 15, 21}, weights in {uniform, distance}, p in {1, 2} | n_neighbors=7, weights=distance, p=2 | 0.936 |
+| Naive Bayes (Gaussian) | none or PowerTransformer (searched) | transform, var_smoothing in {1e-9, 1e-7, 1e-5} | PowerTransformer, var_smoothing=1e-9 | 0.902 |
+| SVM (RBF kernel) | StandardScaler | C in {1, 10, 100}, gamma in {scale, 0.01, 0.1} | C=10, gamma=scale | 0.943 |
 
 Since there are 7 classes, Precision, Recall and F1 are macro averages, and AUC is the one-vs-rest AUC averaged over all classes.
 
