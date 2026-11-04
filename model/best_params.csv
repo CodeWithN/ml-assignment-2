@@ -1,0 +1,6 @@
+ML Model Name,Best Parameters,CV F1 (macro)
+Logistic Regression,C=100,0.9373
+Decision Tree,"criterion=gini, max_depth=10, min_samples_leaf=10",0.9207
+KNN,"n_neighbors=7, p=2, weights=distance",0.9362
+Naive Bayes,"var_smoothing=1e-09, transform=PowerTransformer",0.9021
+Support Vector Machine,"C=10, gamma=scale",0.9427

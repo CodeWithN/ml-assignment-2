@@ -32,7 +32,7 @@ The classes are not balanced. DERMASON is the largest class with 3,546 grains an
 | BARBUNYA | 1322 |
 | BOMBAY | 522 |
 
-I split the data into 80% training (10,888 rows) and 20% testing (2,723 rows) using a stratified split with random_state=42. The test set is saved as `test_data.csv` in the repository.
+I split the data into 80% training (10,888 rows) and 20% testing (2,723 rows) using a stratified split with random_state=2026. The test set is saved as `test_data.csv` in the repository and is never used for training or tuning.
 
 ## c. GitHub Repository Link
 
@@ -59,46 +59,49 @@ ml-assignment-2/
     |-- naive_bayes.joblib
     |-- support_vector_machine.joblib
     |-- metrics.csv
+    |-- best_params.csv
 ```
 
-`train_models.py` trains and saves the models, `metrics_utils.py` calculates the six metrics and `app.py` is the Streamlit app. Each model is saved as a scikit-learn Pipeline, so the StandardScaler is saved inside the same file as the model.
+`train_models.py` tunes, trains and saves the models, `metrics_utils.py` calculates the six metrics and `app.py` is the Streamlit app. Each model is saved as a scikit-learn Pipeline, so the scaler (or power transform) is saved inside the same file as the model. `model/best_params.csv` records the hyperparameters chosen for each model.
 
 ## d. Models Used
 
-Settings used for each model:
+Each model's hyperparameters were tuned with `GridSearchCV` using 5-fold stratified cross-validation on the **training split only**, with macro F1 as the score. The best setting was then refitted on the full training split and evaluated once on the test data.
 
-| Model | Settings |
-|---|---|
-| Logistic Regression | StandardScaler, max_iter=1000 |
-| Decision Tree | max_depth=8, min_samples_leaf=5 |
-| KNN | StandardScaler, n_neighbors=7 |
-| Naive Bayes | GaussianNB, default settings |
-| SVM | StandardScaler, RBF kernel, C=1.0 |
+| Model | Preprocessing | Grid searched | Selected | CV F1 (macro) |
+|---|---|---|---|---:|
+| Logistic Regression | StandardScaler | C in {0.01, 0.1, 1, 10, 100} | C=100 | 0.9373 |
+| Decision Tree | none | criterion in {gini, entropy}, max_depth in {6, 8, 10, 12, None}, min_samples_leaf in {1, 5, 10, 20} | gini, max_depth=10, min_samples_leaf=10 | 0.9207 |
+| KNN | StandardScaler | n_neighbors in {3, 5, 7, 9, 11, 15, 21}, weights in {uniform, distance}, p in {1, 2} | n_neighbors=7, weights=distance, p=2 | 0.9362 |
+| Naive Bayes (Gaussian) | none or PowerTransformer (searched) | transform, var_smoothing in {1e-9, 1e-7, 1e-5} | PowerTransformer, var_smoothing=1e-9 | 0.9021 |
+| SVM (RBF kernel) | StandardScaler | C in {1, 10, 100}, gamma in {scale, 0.01, 0.1} | C=10, gamma=scale | 0.9427 |
 
 Since there are 7 classes, Precision, Recall and F1 are macro averages, and AUC is the one-vs-rest AUC averaged over all classes.
 
 ### Comparison Table
 
+Results on the held-out test data (`test_data.csv`, 2,723 rows):
+
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
 |---|---:|---:|---:|---:|---:|---:|
-| Logistic Regression | 0.9214 | 0.9948 | 0.9354 | 0.9321 | 0.9335 | 0.9050 |
-| Decision Tree | 0.9023 | 0.9837 | 0.9164 | 0.9132 | 0.9147 | 0.8819 |
-| KNN | 0.9137 | 0.9858 | 0.9290 | 0.9245 | 0.9265 | 0.8956 |
-| Naive Bayes | 0.7639 | 0.9672 | 0.7744 | 0.7694 | 0.7677 | 0.7154 |
-| Support Vector Machine | 0.9221 | 0.9949 | 0.9359 | 0.9330 | 0.9343 | 0.9059 |
+| Logistic Regression | 0.9277 | 0.9952 | 0.9395 | 0.9396 | 0.9395 | 0.9126 |
+| Decision Tree | 0.9049 | 0.9828 | 0.9194 | 0.9155 | 0.9174 | 0.8850 |
+| KNN | 0.9269 | 0.9881 | 0.9402 | 0.9395 | 0.9398 | 0.9117 |
+| Naive Bayes | 0.8957 | 0.9919 | 0.9052 | 0.9069 | 0.9057 | 0.8744 |
+| Support Vector Machine | 0.9295 | 0.9953 | 0.9419 | 0.9407 | 0.9413 | 0.9147 |
 
 ### Observations
 
 | ML Model Name | Observation about model performance |
 |---|---|
-| Logistic Regression | Performed very well with about 92% accuracy, almost the same as SVM. This shows that after scaling, most of the bean classes can be separated with linear boundaries. |
-| Decision Tree | Got about 90% accuracy, which is lower than the other models except Naive Bayes. It made the most mistakes between SIRA and DERMASON. I limited the depth to 8 so that it does not overfit. |
-| KNN | Gave about 91% accuracy. Scaling the features was important here because KNN uses distances. The model file is the biggest because KNN keeps all the training data. |
-| Naive Bayes | Worst model with about 76% accuracy. Many features are strongly correlated with each other (for example Area and ConvexArea), so the independence assumption of Naive Bayes does not hold. It classified only 46% of BARBUNYA beans correctly, and most of the misclassified ones (108 of 143) were predicted as CALI. |
-| Support Vector Machine | Best model, with the highest value in all six metrics (accuracy 92.2%, MCC 0.906). The RBF kernel can handle some non-linear boundaries that Logistic Regression cannot. It was the slowest model to train. |
-| Overall, Winner for your dataset? | SVM is the winner for this dataset. Logistic Regression is very close behind and is a simpler model, so it would also be a good choice. |
+| Logistic Regression | Very strong for a linear model: 92.8% accuracy and MCC 0.913, only slightly behind SVM. Tuning picked C=100 (weak regularisation), and training accuracy (92.6%) is almost equal to test accuracy, so it is not overfitting. After scaling, most bean varieties can be separated with linear boundaries. |
+| Decision Tree | Lowest scores apart from Naive Bayes (90.5% accuracy, MCC 0.885) and the lowest AUC (0.983), because a tree gives coarse leaf-based probabilities. Tuning chose max_depth=10 with min_samples_leaf=10. There is still a gap between training (94.0%) and test (90.5%) accuracy. It is the only model that misclassified some BOMBAY beans (96.2% recall), and its most common error was SIRA vs DERMASON (109 test beans). |
+| KNN | 92.7% accuracy with the second-best F1 (0.940), almost the same as Logistic Regression. Tuning picked k=7 with distance weighting. Scaling is essential because KNN uses distances. Its AUC (0.988) is lower than LR and SVM because probabilities come from only 7 neighbours. The model file is the largest (about 1.5 MB) because KNN stores the whole training set. |
+| Naive Bayes | Still the weakest model (89.6% accuracy, MCC 0.874), because many features are strongly correlated (for example Area, ConvexArea and EquivDiameter), which breaks the independence assumption. The grid search chose a PowerTransformer before GaussianNB, which made the skewed features closer to Gaussian and raised test accuracy from 75.9% (plain GaussianNB) to 89.6%. Its AUC (0.992) is high, so it ranks classes well even when its top prediction is wrong. BARBUNYA was its hardest class (83.4% recall), and most of those errors were predicted as CALI (33 of 44). |
+| Support Vector Machine | Best model, with the highest value in all six metrics (accuracy 92.9%, AUC 0.995, MCC 0.915) and the best cross-validation F1 (0.943). With C=10 the RBF kernel fits slightly non-linear boundaries that Logistic Regression cannot. It is the slowest model to train because of the kernel and probability calibration. |
+| Overall, Winner for your dataset? | SVM is the winner for this dataset. Logistic Regression and KNN are very close (MCC within 0.003). Logistic Regression would be a good simpler alternative because it is faster and easier to interpret. |
 
-In all models BOMBAY was classified 100% correctly, because these beans are much bigger than the others. Apart from Naive Bayes, most of the errors in the models were between SIRA and DERMASON, and between BARBUNYA and CALI, which look similar in size and shape.
+In every model the most common mistake was SIRA vs DERMASON, followed by BARBUNYA vs CALI or DERMASON vs SEKER. These pairs have similar size and shape. BOMBAY beans are much larger than the others and were classified perfectly by Logistic Regression, KNN and SVM.
 
 ## Streamlit App
 
@@ -116,6 +119,6 @@ The models are only loaded from the `model` folder and are not trained again in 
 
 ```bash
 pip install -r requirements.txt
-python train_models.py
+python train_models.py   # tunes and saves all five models (about 15 seconds)
 streamlit run app.py
 ```
