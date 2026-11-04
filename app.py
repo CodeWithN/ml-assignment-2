@@ -140,7 +140,7 @@ def validate_test_data(df: pd.DataFrame, model):
 
 
 def plot_confusion_matrix(y_true, y_pred, labels):
-    """Create the blue heatmap-style confusion matrix."""
+    """Draw the confusion matrix as an annotated heatmap."""
 
     matrix = confusion_matrix(
         y_true,

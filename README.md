@@ -94,7 +94,7 @@ Since there are 7 classes, Precision, Recall and F1 are macro averages, and AUC 
 | Logistic Regression | Performed very well with about 92% accuracy, almost the same as SVM. This shows that after scaling, most of the bean classes can be separated with linear boundaries. |
 | Decision Tree | Got about 90% accuracy, which is lower than the other models except Naive Bayes. It made the most mistakes between SIRA and DERMASON. I limited the depth to 8 so that it does not overfit. |
 | KNN | Gave about 91% accuracy. Scaling the features was important here because KNN uses distances. The model file is the biggest because KNN keeps all the training data. |
-| Naive Bayes | Worst model with about 76% accuracy. Many features are strongly correlated with each other (for example Area and ConvexArea), so the independence assumption of Naive Bayes does not hold. It classified only 46% of BARBUNYA beans correctly and confused most of them with CALI. |
+| Naive Bayes | Worst model with about 76% accuracy. Many features are strongly correlated with each other (for example Area and ConvexArea), so the independence assumption of Naive Bayes does not hold. It classified only 46% of BARBUNYA beans correctly, and most of the misclassified ones (108 of 143) were predicted as CALI. |
 | Support Vector Machine | Best model, with the highest value in all six metrics (accuracy 92.2%, MCC 0.906). The RBF kernel can handle some non-linear boundaries that Logistic Regression cannot. It was the slowest model to train. |
 | Overall, Winner for your dataset? | SVM is the winner for this dataset. Logistic Regression is very close behind and is a simpler model, so it would also be a good choice. |
 
