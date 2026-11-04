@@ -70,7 +70,7 @@ Each model's hyperparameters were tuned with `GridSearchCV` using 5-fold stratif
 
 | Model | Preprocessing | Grid searched | Selected | CV F1 (macro) |
 |---|---|---|---|---:|
-| Logistic Regression | StandardScaler | C in {0.01, 0.1, 1, 10, 100} | C=100 | 0.9373 |
+| Logistic Regression | StandardScaler (newton-cg solver, tol=1e-8) | C in {0.01, 0.1, 1, 10, 100} | C=100 | 0.9370 |
 | Decision Tree | none | criterion in {gini, entropy}, max_depth in {6, 8, 10, 12, None}, min_samples_leaf in {1, 5, 10, 20} | gini, max_depth=10, min_samples_leaf=10 | 0.9207 |
 | KNN | StandardScaler | n_neighbors in {3, 5, 7, 9, 11, 15, 21}, weights in {uniform, distance}, p in {1, 2} | n_neighbors=7, weights=distance, p=2 | 0.9362 |
 | Naive Bayes (Gaussian) | none or PowerTransformer (searched) | transform, var_smoothing in {1e-9, 1e-7, 1e-5} | PowerTransformer, var_smoothing=1e-9 | 0.9021 |
@@ -84,7 +84,7 @@ Results on the held-out test data (`test_data.csv`, 2,723 rows):
 
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 | MCC |
 |---|---:|---:|---:|---:|---:|---:|
-| Logistic Regression | 0.9277 | 0.9952 | 0.9395 | 0.9396 | 0.9395 | 0.9126 |
+| Logistic Regression | 0.9280 | 0.9953 | 0.9399 | 0.9399 | 0.9398 | 0.9130 |
 | Decision Tree | 0.9049 | 0.9828 | 0.9194 | 0.9155 | 0.9174 | 0.8850 |
 | KNN | 0.9269 | 0.9881 | 0.9402 | 0.9395 | 0.9398 | 0.9117 |
 | Naive Bayes | 0.8957 | 0.9919 | 0.9052 | 0.9069 | 0.9057 | 0.8744 |
@@ -96,9 +96,9 @@ Results on the held-out test data (`test_data.csv`, 2,723 rows):
 |---|---|
 | Logistic Regression | Very strong for a linear model: 92.8% accuracy and MCC 0.913, only slightly behind SVM. Tuning picked C=100 (weak regularisation), and training accuracy (92.6%) is almost equal to test accuracy, so it is not overfitting. After scaling, most bean varieties can be separated with linear boundaries. |
 | Decision Tree | Lowest scores apart from Naive Bayes (90.5% accuracy, MCC 0.885) and the lowest AUC (0.983), because a tree gives coarse leaf-based probabilities. Tuning chose max_depth=10 with min_samples_leaf=10. There is still a gap between training (94.0%) and test (90.5%) accuracy. It is the only model that misclassified some BOMBAY beans (96.2% recall), and its most common error was SIRA vs DERMASON (109 test beans). |
-| KNN | 92.7% accuracy with the second-best F1 (0.940), almost the same as Logistic Regression. Tuning picked k=7 with distance weighting. Scaling is essential because KNN uses distances. Its AUC (0.988) is lower than LR and SVM because probabilities come from only 7 neighbours. The model file is the largest (about 1.5 MB) because KNN stores the whole training set. |
+| KNN | 92.7% accuracy and F1 of 0.940, practically tied with Logistic Regression. Tuning picked k=7 with distance weighting. Scaling is essential because KNN uses distances. Its AUC (0.988) is lower than LR and SVM because probabilities come from only 7 neighbours. The model file is the largest (about 1.5 MB) because KNN stores the whole training set. |
 | Naive Bayes | Still the weakest model (89.6% accuracy, MCC 0.874), because many features are strongly correlated (for example Area, ConvexArea and EquivDiameter), which breaks the independence assumption. The grid search chose a PowerTransformer before GaussianNB, which made the skewed features closer to Gaussian and raised test accuracy from 75.9% (plain GaussianNB) to 89.6%. Its AUC (0.992) is high, so it ranks classes well even when its top prediction is wrong. BARBUNYA was its hardest class (83.4% recall), and most of those errors were predicted as CALI (33 of 44). |
-| Support Vector Machine | Best model, with the highest value in all six metrics (accuracy 92.9%, AUC 0.995, MCC 0.915) and the best cross-validation F1 (0.943). With C=10 the RBF kernel fits slightly non-linear boundaries that Logistic Regression cannot. It is the slowest model to train because of the kernel and probability calibration. |
+| Support Vector Machine | Best model, with the highest value in all six metrics (accuracy 92.9%, MCC 0.915; its AUC of 0.9953 is level with Logistic Regression at four decimals) and the best cross-validation F1 (0.943). With C=10 the RBF kernel fits slightly non-linear boundaries that Logistic Regression cannot. It is the slowest model to train because of the kernel and probability calibration. |
 | Overall, Winner for your dataset? | SVM is the winner for this dataset. Logistic Regression and KNN are very close (MCC within 0.003). Logistic Regression would be a good simpler alternative because it is faster and easier to interpret. |
 
 In every model the most common mistake was SIRA vs DERMASON, followed by BARBUNYA vs CALI or DERMASON vs SEKER. These pairs have similar size and shape. BOMBAY beans are much larger than the others and were classified perfectly by Logistic Regression, KNN and SVM.

@@ -49,8 +49,13 @@ def build_search_spaces():
         "Logistic Regression": (
             Pipeline([
                 ("scaler", StandardScaler()),
+                # newton-cg with a tight tolerance converges fully, so the
+                # result is the same on different machines / library builds
+                # (lbfgs stopped early and gave slightly different weights).
                 ("classifier", LogisticRegression(
-                    max_iter=3000,
+                    solver="newton-cg",
+                    tol=1e-8,
+                    max_iter=1000,
                     random_state=RANDOM_STATE,
                 )),
             ]),
